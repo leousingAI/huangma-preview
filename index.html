@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>黄麻山树洞画徒步打卡指南</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --green: #2d8659;
+    --green-light: #4caf7d;
+    --green-pale: #e8f5ec;
+    --orange: #ff8a3c;
+    --orange-light: #ffb066;
+    --bg: #f0f7f4;
+    --text: #2c3e2d;
+    --text-light: #6b8170;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(45,134,89,0.12);
+    --shadow-lg: 0 8px 30px rgba(45,134,89,0.18);
+    --radius: 16px;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); line-height:1.7; max-width:430px; margin:0 auto; overflow-x:hidden; }
+  img { max-width:100%; display:block; }
+
+  /* Cover */
+  .cover { position:relative; min-height:340px; background:linear-gradient(135deg,var(--green) 0%,var(--green-light) 50%,#7ec99e 100%); overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px 24px; text-align:center; color:#fff; }
+  .cover::before { content:""; position:absolute; top:-20px; right:-30px; width:160px; height:160px; background:rgba(255,255,255,0.08); border-radius:50%; }
+  .cover::after { content:""; position:absolute; bottom:-40px; left:-40px; width:200px; height:200px; background:rgba(255,138,60,0.12); border-radius:50%; }
+  .cover-badge { background:rgba(255,255,255,0.2); backdrop-filter:blur(8px); padding:6px 16px; border-radius:20px; font-size:13px; letter-spacing:1px; margin-bottom:16px; z-index:1; }
+  .cover h1 { font-size:28px; font-weight:800; margin-bottom:8px; z-index:1; text-shadow:0 2px 8px rgba(0,0,0,0.15); }
+  .cover p { font-size:15px; opacity:0.92; z-index:1; max-width:300px; }
+  .cover-deco { position:absolute; bottom:0; left:0; right:0; height:24px; background:var(--bg); border-radius:24px 24px 0 0; z-index:1; }
+
+  /* Section */
+  .section { padding:24px 20px; }
+  .section-title { font-size:20px; font-weight:800; color:var(--green); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .section-title::before { content:""; width:4px; height:20px; background:var(--orange); border-radius:2px; }
+
+  /* Route Detail */
+  .route-detail { background:var(--white); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-top:16px; }
+  .route-steps { list-style:none; }
+  .route-steps li { position:relative; padding-left:32px; padding-bottom:16px; font-size:14px; }
+  .route-steps li:last-child { padding-bottom:0; }
+  .route-steps li::before { content:""; position:absolute; left:10px; top:6px; width:10px; height:10px; background:var(--green-light); border-radius:50%; z-index:1; }
+  .route-steps li::after { content:""; position:absolute; left:14px; top:16px; bottom:0; width:2px; background:var(--green-pale); }
+  .route-steps li:last-child::after { display:none; }
+  .route-steps .step-name { font-weight:700; color:var(--text); }
+  .route-steps .step-desc { color:var(--text-light); font-size:13px; margin-top:2px; }
+
+  /* Tree Hole Gallery */
+  .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .gallery-item { background:var(--white); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); position:relative; }
+  .gallery-photo { height:160px; background:linear-gradient(135deg,var(--green-pale),#d4edda); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+  .gallery-photo img { width:100%; height:100%; object-fit:cover; }
+  .gallery-info { padding:10px 12px; }
+  .gallery-name { font-size:14px; font-weight:700; margin-bottom:2px; }
+  .gallery-loc { font-size:12px; color:var(--text-light); }
+  .gallery-check { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; transition:transform .2s; }
+  .gallery-check:active { transform:scale(1.2); }
+  .gallery-check.checked { background:var(--orange); }
+
+  /* Locked state */
+  .gallery-item.locked .gallery-photo img { filter:blur(8px) brightness(0.7); }
+  .lock-overlay { display:none; }
+  .gallery-item.locked .lock-overlay { position:absolute; top:0; left:0; right:0; height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); pointer-events:none; z-index:2; }
+  .lock-icon { font-size:32px; margin-bottom:4px; }
+  .gallery-item.locked .gallery-check { display:none; }
+
+  /* Checklist */
+  .checklist { background:var(--white); border-radius:var(--radius); padding:8px 16px; box-shadow:var(--shadow); }
+  .checklist label { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f0f0f0; font-size:14px; cursor:pointer; }
+  .checklist label:last-child { border-bottom:none; }
+  .checklist input { width:22px; height:22px; margin-right:12px; accent-color:var(--orange); flex-shrink:0; }
+  .checklist label.done { text-decoration:line-through; color:var(--text-light); }
+  .checklist .cl-icon { margin-right:8px; font-size:18px; }
+
+  /* Tips */
+  .tips { background:var(--white); border-radius:var(--radius); padding:16px 20px; box-shadow:var(--shadow); }
+  .tips li { list-style:none; padding:8px 0; font-size:14px; border-bottom:1px solid #f5f5f5; display:flex; gap:8px; }
+  .tips li:last-child { border-bottom:none; }
+  .tips .tip-icon { flex-shrink:0; }
+
+  /* Transport */
+  .transport { background:var(--white); border-radius:var(--radius); padding:16px 20px; box-shadow:var(--shadow); }
+  .transport-row { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+  .transport-row:last-child { border-bottom:none; }
+  .transport-icon { font-size:24px; flex-shrink:0; }
+  .transport-text { font-size:14px; }
+  .transport-text strong { display:block; margin-bottom:2px; }
+
+  /* Progress Bar */
+  .progress-bar { position:sticky; top:0; z-index:100; background:var(--white); padding:10px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); display:flex; align-items:center; gap:10px; }
+  .progress-track { flex:1; height:8px; background:#e0e0e0; border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--orange-light)); border-radius:4px; transition:width .4s ease; width:0%; }
+  .progress-text { font-size:13px; font-weight:700; color:var(--green); white-space:nowrap; }
+
+  /* Footer & Paywall */
+  .paywall { background:linear-gradient(135deg,var(--green),var(--green-light)); padding:32px 24px; text-align:center; color:#fff; border-radius:24px 24px 0 0; margin-top:8px; }
+  .paywall h3 { font-size:20px; margin-bottom:8px; }
+  .paywall p { font-size:14px; opacity:0.9; margin-bottom:16px; }
+  .paywall-price { font-size:36px; font-weight:800; margin-bottom:4px; }
+  .paywall-price small { font-size:14px; font-weight:400; }
+  .paywall-btn { display:inline-block; background:var(--orange); color:#fff; padding:14px 40px; border-radius:28px; font-size:17px; font-weight:700; text-decoration:none; margin-top:12px; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(255,138,60,0.45); }
+  .paywall-btn:active { transform:scale(0.97); }
+  .paywall-note { font-size:12px; opacity:0.75; margin-top:16px; line-height:1.6; }
+  .paywall-locked { display:block; }
+  .paywall-unlocked { display:none; }
+  .paywall.is-paid .paywall-locked { display:none; }
+  .paywall.is-paid .paywall-unlocked { display:block; }
+
+  /* Footer */
+  .footer { background:var(--white); padding:24px; text-align:center; color:var(--text-light); font-size:12px; }
+  .footer a { color:var(--green); }
+
+  /* Animations */
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+  .animate-in { animation:fadeIn .5s ease; }
+
+  /* Stat Cards */
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:20px; }
+  .stat-card { background:var(--white); border-radius:12px; padding:12px 8px; text-align:center; box-shadow:var(--shadow); }
+  .stat-num { font-size:22px; font-weight:800; color:var(--green); }
+  .stat-label { font-size:11px; color:var(--text-light); margin-top:2px; }
+
+  /* Route Guide Images */
+  .route-map { width:100%; border-radius:12px; box-shadow:var(--shadow); margin:12px 0; }
+  .entrance-card { background:var(--white); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin-bottom:16px; }
+  .entrance-card img { width:100%; display:block; }
+  .entrance-body { padding:16px; }
+  .entrance-title { font-size:16px; font-weight:800; color:var(--green); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .entrance-steps { list-style:none; }
+  .entrance-steps li { padding:6px 0 6px 24px; position:relative; font-size:13px; color:var(--text); line-height:1.6; }
+  .entrance-steps li::before { content:""; position:absolute; left:6px; top:12px; width:8px; height:8px; background:var(--orange); border-radius:50%; }
+  .keypoint { background:#fff8f0; border-left:3px solid var(--orange); padding:10px 14px; border-radius:0 8px 8px 0; margin:10px 0; font-size:13px; color:var(--text); }
+  .keypoint strong { color:var(--orange); }
+  .route-segment { background:var(--white); border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
+  .segment-tag { display:inline-block; background:var(--green-pale); color:var(--green); font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0/70</div>
+</div>
+
+<div class="cover">
+  <div class="cover-badge">🌲 长岭国家登山健身步道 · 101小环线</div>
+  <h1>黄麻山树洞画<br>徒步打卡指南</h1>
+  <p>70张卡通树洞彩绘实拍 · 竹林溯溪 · 亲子友好 · 广州徒步天花板</p>
+  <div class="cover-deco"></div>
+</div>
+
+<div class="section">
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num">70</div><div class="stat-label">树洞彩绘</div></div>
+    <div class="stat-card"><div class="stat-num">6.3km</div><div class="stat-label">环线全程</div></div>
+    <div class="stat-card"><div class="stat-num">3-5h</div><div class="stat-label">预计用时</div></div>
+  </div>
+
+  <div class="section-title">路线总览</div>
+  <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">101小环线由A线（精华线）和B线（环线）串联而成，不走回头路。跟着101号路桩走不迷路。</p>
+  <img class="route-map" src="photos/route-guide-3.jpg" alt="101小环线路线总览图">
+
+  <div class="section-title" style="margin-top:24px;">两个入口怎么选</div>
+  <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">101小环线有两个入口，建议从黄麻入口进、珠山方向出，或者反过来走都行。</p>
+
+  <div class="entrance-card">
+    <img src="photos/route-guide-2.jpg" alt="黄麻入口指引图">
+    <div class="entrance-body">
+      <div class="entrance-title">🚶 黄麻入口（徒步主入口）</div>
+      <ul class="entrance-steps">
+        <li>导航搜索「黄麻社区居委会」</li>
+        <li>看到「长岭国家登山健身步道」牌子</li>
+        <li>对面白色吊桥，过桥进入步道</li>
+        <li>入口处有洗手间（免费）</li>
+        <li>木阶梯穿过竹林，约1小时到碧荫小溪</li>
+        <li>这段是树洞画集中区，沿途慢慢找</li>
+      </ul>
+      <div class="keypoint"><strong>🔑 关键路口：</strong>过吊桥后走右侧方向上，跟着101路桩走。木栈道尽头进竹林。</div>
+    </div>
+  </div>
+
+  <div class="entrance-card">
+    <img src="photos/route-guide-1.jpg" alt="珠山入口指引图">
+    <div class="entrance-body">
+      <div class="entrance-title">🏞️ 珠山入口（溯溪入口）</div>
+      <ul class="entrance-steps">
+        <li>导航搜索「珠山」</li>
+        <li>篮球场可停车（免费）</li>
+        <li>从篮球场<strong>右转</strong>进小路</li>
+        <li>看到指引牌<strong>左转</strong>进溪流小径</li>
+        <li>沿溪流走约5分钟到碧荫小溪</li>
+        <li>适合想先玩水再爬山的走法</li>
+      </ul>
+      <div class="keypoint"><strong>🔑 关键路口：</strong>篮球场右转→看到指引牌左转→进溪流小径。别走错岔路！</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:24px;">101小环线详细路书</div>
+  <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">以下按<strong>黄麻入口出发</strong>顺时针走，全程6.3km，3-5小时。</p>
+
+  <div class="route-segment">
+    <span class="segment-tag">第一段 · 约2km · 树洞画精华区</span>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🚩 黄麻入口 → 碧荫小溪</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">
+      过白色吊桥 → 木阶梯上山 → 穿竹林 → 树洞画集中区域！熊猫、松鼠、兔子、华南虎、猫头鹰……70张树洞画大部分在这段。沿途慢慢找，每个树洞画都是一个打卡点。走到竹林尽头听到水声就到碧荫小溪了。
+    </div>
+    <div class="keypoint"><strong>🔑 关键路口：</strong>过吊桥后走右边方向，木栈道尽头不要岔左，继续沿101路桩直走上竹林小径。</div>
+  </div>
+
+  <div class="route-segment">
+    <span class="segment-tag">中段休息 · 碧荫小溪</span>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">💧 碧荫小溪打卡点</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">
+      竹林环绕的清凉小溪，可脱鞋踩水休息。旁边有小卖部补给。这里也是从珠山入口过来的交汇点。
+    </div>
+    <div class="keypoint"><strong>👈 第一个下撤点：</strong>不想继续走可从珠山方向下撤回篮球场。</div>
+  </div>
+
+  <div class="route-segment">
+    <span class="segment-tag">第二段 · 约2km · 野花秋千段</span>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🌾 碧荫小溪 → 黄麻士多店</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">
+      石阶梯上坡 → 另一条小溪 → 竹林野花段。路边有秋千可以歇脚拍照。继续走经过贤记农庄附近到黄麻士多店。
+    </div>
+    <div class="keypoint"><strong>🔑 关键路口：</strong>碧荫小溪过桥后右转上石阶，不要直走溯溪。到贤记农庄/黄麻路交叉口可下撤。</div>
+    <div class="keypoint"><strong>👈 第二个下撤点：</strong>贤记农庄/黄麻路交叉口。</div>
+  </div>
+
+  <div class="route-segment">
+    <span class="segment-tag">补给点 · 黄麻士多店</span>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🛖 黄麻士多店</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">
+      有洗手间和补给，水、饮料、零食都有卖。歇口气继续走最后一段。
+    </div>
+    <div class="keypoint"><strong>👈 第三个下撤点：</strong>士多店旁可沿柏油马路直接回起点，约15分钟。</div>
+  </div>
+
+  <div class="route-segment">
+    <span class="segment-tag">第三段 · 约2km · 蘑菇石林段</span>
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🛣️ 黄麻士多店 → 终点</div>
+    <div style="font-size:13px;color:var(--text-light);line-height:1.8;">
+      登山石阶 → 土路 → 蘑菇石林景观 → 柏油马路 → 回到黄麻主入口停车场。
+    </div>
+    <div class="keypoint"><strong>🔑 关键路口：</strong>士多店出发走登山石阶上坡，到蘑菇石林后走柏油马路下坡回起点。</div>
+    <div class="keypoint"><strong>👈 第四个下撤点：</strong>蘑菇石林可沿小路下撤。</div>
+  </div>
+
+  <div class="route-segment" style="background:linear-gradient(135deg,var(--green-pale),#d4edda);">
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🏁 环线完成！</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;">
+      回到黄麻主入口停车场，全程6.3km，70张树洞画收集完毕！🎉
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">树洞画打卡墙</div>
+  <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">沿途70张树洞彩绘实拍，找到就点圆圈打卡！前10张免费预览，付费解锁全部70张。</p>
+  <div class="gallery-grid" id="gallery">
+    <div class="gallery-item" data-index="1">
+      <div class="gallery-photo"><img src="photos/IMG_8448.jpeg" alt="树洞画 #1"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #1</div><div class="gallery-loc">第1号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="2">
+      <div class="gallery-photo"><img src="photos/IMG_8449.jpeg" alt="树洞画 #2"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #2</div><div class="gallery-loc">第2号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="3">
+      <div class="gallery-photo"><img src="photos/IMG_8458.jpeg" alt="树洞画 #3"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #3</div><div class="gallery-loc">第3号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="4">
+      <div class="gallery-photo"><img src="photos/IMG_8462.jpeg" alt="树洞画 #4"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #4</div><div class="gallery-loc">第4号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="5">
+      <div class="gallery-photo"><img src="photos/IMG_8464.jpeg" alt="树洞画 #5"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #5</div><div class="gallery-loc">第5号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="6">
+      <div class="gallery-photo"><img src="photos/IMG_8468.jpeg" alt="树洞画 #6"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #6</div><div class="gallery-loc">第6号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="7">
+      <div class="gallery-photo"><img src="photos/IMG_8471.jpeg" alt="树洞画 #7"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #7</div><div class="gallery-loc">第7号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="8">
+      <div class="gallery-photo"><img src="photos/IMG_8474.jpeg" alt="树洞画 #8"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #8</div><div class="gallery-loc">第8号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="9">
+      <div class="gallery-photo"><img src="photos/IMG_8480.jpeg" alt="树洞画 #9"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #9</div><div class="gallery-loc">第9号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item" data-index="10">
+      <div class="gallery-photo"><img src="photos/IMG_8481.jpeg" alt="树洞画 #10"></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #10</div><div class="gallery-loc">第10号打卡点</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="11">
+      <div class="gallery-photo"><img src="photos/IMG_8484.jpeg" alt="树洞画 #11"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #11</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="12">
+      <div class="gallery-photo"><img src="photos/IMG_8485.jpeg" alt="树洞画 #12"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #12</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="13">
+      <div class="gallery-photo"><img src="photos/IMG_8486.jpeg" alt="树洞画 #13"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #13</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="14">
+      <div class="gallery-photo"><img src="photos/IMG_8489.jpeg" alt="树洞画 #14"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #14</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="15">
+      <div class="gallery-photo"><img src="photos/IMG_8492.jpeg" alt="树洞画 #15"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #15</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="16">
+      <div class="gallery-photo"><img src="photos/IMG_8493.jpeg" alt="树洞画 #16"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #16</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="17">
+      <div class="gallery-photo"><img src="photos/IMG_8495.jpeg" alt="树洞画 #17"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #17</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="18">
+      <div class="gallery-photo"><img src="photos/IMG_8496.jpeg" alt="树洞画 #18"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #18</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="19">
+      <div class="gallery-photo"><img src="photos/IMG_8497.jpeg" alt="树洞画 #19"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #19</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="20">
+      <div class="gallery-photo"><img src="photos/IMG_8498.jpeg" alt="树洞画 #20"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #20</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="21">
+      <div class="gallery-photo"><img src="photos/IMG_8499.jpeg" alt="树洞画 #21"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #21</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="22">
+      <div class="gallery-photo"><img src="photos/IMG_8501.jpeg" alt="树洞画 #22"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #22</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="23">
+      <div class="gallery-photo"><img src="photos/IMG_8502.jpeg" alt="树洞画 #23"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #23</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="24">
+      <div class="gallery-photo"><img src="photos/IMG_8503.jpeg" alt="树洞画 #24"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #24</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="25">
+      <div class="gallery-photo"><img src="photos/IMG_8504.jpeg" alt="树洞画 #25"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #25</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="26">
+      <div class="gallery-photo"><img src="photos/IMG_8505.jpeg" alt="树洞画 #26"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #26</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="27">
+      <div class="gallery-photo"><img src="photos/IMG_8506.jpeg" alt="树洞画 #27"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #27</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="28">
+      <div class="gallery-photo"><img src="photos/IMG_8507.jpeg" alt="树洞画 #28"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #28</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="29">
+      <div class="gallery-photo"><img src="photos/IMG_8508.jpeg" alt="树洞画 #29"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #29</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="30">
+      <div class="gallery-photo"><img src="photos/IMG_8509.jpeg" alt="树洞画 #30"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #30</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="31">
+      <div class="gallery-photo"><img src="photos/IMG_8510.jpeg" alt="树洞画 #31"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #31</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="32">
+      <div class="gallery-photo"><img src="photos/IMG_8511.jpeg" alt="树洞画 #32"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #32</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="33">
+      <div class="gallery-photo"><img src="photos/IMG_8512.jpeg" alt="树洞画 #33"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #33</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="34">
+      <div class="gallery-photo"><img src="photos/IMG_8513.jpeg" alt="树洞画 #34"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #34</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="35">
+      <div class="gallery-photo"><img src="photos/IMG_8514.jpeg" alt="树洞画 #35"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #35</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="36">
+      <div class="gallery-photo"><img src="photos/IMG_8515.jpeg" alt="树洞画 #36"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #36</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="37">
+      <div class="gallery-photo"><img src="photos/IMG_8516.jpeg" alt="树洞画 #37"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #37</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="38">
+      <div class="gallery-photo"><img src="photos/IMG_8517.jpeg" alt="树洞画 #38"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #38</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="39">
+      <div class="gallery-photo"><img src="photos/IMG_8518.jpeg" alt="树洞画 #39"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #39</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="40">
+      <div class="gallery-photo"><img src="photos/IMG_8519.jpeg" alt="树洞画 #40"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #40</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="41">
+      <div class="gallery-photo"><img src="photos/IMG_8520.jpeg" alt="树洞画 #41"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #41</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="42">
+      <div class="gallery-photo"><img src="photos/IMG_8521.jpeg" alt="树洞画 #42"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #42</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="43">
+      <div class="gallery-photo"><img src="photos/IMG_8522.jpeg" alt="树洞画 #43"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #43</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="44">
+      <div class="gallery-photo"><img src="photos/IMG_8523.jpeg" alt="树洞画 #44"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #44</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="45">
+      <div class="gallery-photo"><img src="photos/IMG_8524.jpeg" alt="树洞画 #45"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #45</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="46">
+      <div class="gallery-photo"><img src="photos/IMG_8525.jpeg" alt="树洞画 #46"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #46</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="47">
+      <div class="gallery-photo"><img src="photos/IMG_8526.jpeg" alt="树洞画 #47"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #47</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="48">
+      <div class="gallery-photo"><img src="photos/IMG_8527.jpeg" alt="树洞画 #48"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #48</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="49">
+      <div class="gallery-photo"><img src="photos/IMG_8529.jpeg" alt="树洞画 #49"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #49</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="50">
+      <div class="gallery-photo"><img src="photos/IMG_8530.jpeg" alt="树洞画 #50"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #50</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="51">
+      <div class="gallery-photo"><img src="photos/IMG_8531.jpeg" alt="树洞画 #51"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #51</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="52">
+      <div class="gallery-photo"><img src="photos/IMG_8532.jpeg" alt="树洞画 #52"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #52</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="53">
+      <div class="gallery-photo"><img src="photos/IMG_8533.jpeg" alt="树洞画 #53"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #53</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="54">
+      <div class="gallery-photo"><img src="photos/IMG_8534.jpeg" alt="树洞画 #54"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #54</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="55">
+      <div class="gallery-photo"><img src="photos/IMG_8535.jpeg" alt="树洞画 #55"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #55</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="56">
+      <div class="gallery-photo"><img src="photos/IMG_8536.jpeg" alt="树洞画 #56"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #56</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="57">
+      <div class="gallery-photo"><img src="photos/IMG_8537.jpeg" alt="树洞画 #57"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #57</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="58">
+      <div class="gallery-photo"><img src="photos/IMG_8538.jpeg" alt="树洞画 #58"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #58</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="59">
+      <div class="gallery-photo"><img src="photos/IMG_8539.jpeg" alt="树洞画 #59"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #59</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="60">
+      <div class="gallery-photo"><img src="photos/IMG_8540.jpeg" alt="树洞画 #60"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #60</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="61">
+      <div class="gallery-photo"><img src="photos/IMG_8541.jpeg" alt="树洞画 #61"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #61</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="62">
+      <div class="gallery-photo"><img src="photos/IMG_8542.jpeg" alt="树洞画 #62"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #62</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="63">
+      <div class="gallery-photo"><img src="photos/IMG_8543.jpeg" alt="树洞画 #63"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #63</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="64">
+      <div class="gallery-photo"><img src="photos/IMG_8544.jpeg" alt="树洞画 #64"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #64</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="65">
+      <div class="gallery-photo"><img src="photos/IMG_8545.jpeg" alt="树洞画 #65"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #65</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="66">
+      <div class="gallery-photo"><img src="photos/IMG_8546.jpeg" alt="树洞画 #66"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #66</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="67">
+      <div class="gallery-photo"><img src="photos/IMG_8547.jpeg" alt="树洞画 #67"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #67</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="68">
+      <div class="gallery-photo"><img src="photos/IMG_8548.jpeg" alt="树洞画 #68"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #68</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="69">
+      <div class="gallery-photo"><img src="photos/IMG_8549.jpeg" alt="树洞画 #69"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #69</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+    <div class="gallery-item locked" data-index="70">
+      <div class="gallery-photo"><img src="photos/IMG_8554.jpeg" alt="树洞画 #70"></div>
+      <div class="lock-overlay"><div class="lock-icon">🔒</div><div>解锁后查看</div></div>
+      <div class="gallery-info"><div class="gallery-name">树洞画 #70</div><div class="gallery-loc">付费解锁</div></div>
+      <div class="gallery-check" onclick="toggleCheck(this)">○</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">装备清单</div>
+  <div class="checklist" id="checklist">
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">👟</span>防滑徒步鞋/运动鞋</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">🧴</span>防晒霜+驱蚊水</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">💧</span>饮用水 0.5-1.5L</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">🍪</span>零食补充能量</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">🎒</span>双肩包</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">🗑️</span>垃圾袋（无痕徒步）</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">📱</span>充满电的手机（拍照+导航）</label>
+    <label><input type="checkbox" onchange="toggleItem(this)"><span class="cl-icon">💊</span>创可贴等常备药品</label>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">注意事项</div>
+  <ul class="tips">
+    <li><span class="tip-icon">🚻</span>起点过吊桥台阶处、黄麻士多店附近有免费公厕；碧荫山溪附近有收费公厕</li>
+    <li><span class="tip-icon">🌧️</span>雨天山路湿滑难走，尽量选晴天出行</li>
+    <li><span class="tip-icon">🐍</span>山林草丛多，注意防范蛇虫蚊虫，长裤长袖更安全</li>
+    <li><span class="tip-icon">🅿️</span>自驾停车免费但周末车位紧张，建议11点前到</li>
+    <li><span class="tip-icon">♻️</span>爱护山野环境，无痕徒步不乱丢垃圾</li>
+    <li><span class="tip-icon">📍</span>建议下载"两步路户外助手"APP，搜索"黄麻南环线"获取轨迹</li>
+  </ul>
+</div>
+
+<div class="section">
+  <div class="section-title">交通指南</div>
+  <div class="transport">
+    <div class="transport-row"><div class="transport-icon">🚇</div><div class="transport-text"><strong>地铁+公交</strong>21号线长平站B2口 → 转569路公交到「黄麻社区居委会站」</div></div>
+    <div class="transport-row"><div class="transport-icon">🚗</div><div class="transport-text"><strong>自驾导航</strong>搜索「长岭国家登山健身步道」或「黄麻社区居委会」，入口有免费停车场</div></div>
+    <div class="transport-row"><div class="transport-icon">🎫</div><div class="transport-text"><strong>门票</strong>全程免费</div></div>
+  </div>
+</div>
+
+<div class="paywall" id="paywall">
+  <div class="paywall-locked">
+    <h3>🔒 解锁完整版打卡指南</h3>
+    <p>已免费预览前10张树洞画<br>付费即可解锁全部70张实拍 + 完整打卡功能</p>
+    <div class="paywall-price">¥1.99 <small>/ 份</small></div>
+    <button class="paywall-btn" onclick="unlock()">立即解锁</button>
+    <div class="paywall-note">本产品为虚拟数字内容，购买后不支持退款<br>点击按钮即视为同意解锁全部内容</div>
+  </div>
+  <div class="paywall-unlocked">
+    <h3>✅ 已全部解锁</h3>
+    <p>你已解锁全部70张树洞画实拍<br>快去山上把它们一个个打卡吧！</p>
+    <div class="paywall-note"><a href="#" style="color:#fff;text-decoration:underline;" onclick="resetLock();return false;">重置锁定状态（测试用）</a></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>黄麻山树洞画徒步打卡指南 · 2026年8月更新</div>
+  <div style="margin-top:6px;">本页面由阿红商业运营智能体协助生成</div>
+</div>
+
+<script>
+const totalChecks = 70;
+let checkedCount = 0;
+let isPaid = false;
+
+function checkPaid() {
+  isPaid = localStorage.getItem('huangma_unlocked') === 'true';
+  if (isPaid) { applyUnlock(); }
+}
+
+function unlock() {
+  localStorage.setItem('huangma_unlocked', 'true');
+  isPaid = true;
+  applyUnlock();
+}
+
+function applyUnlock() {
+  document.getElementById('paywall').classList.add('is-paid');
+  document.querySelectorAll('.gallery-item.locked').forEach(el => {
+    el.classList.remove('locked');
+    const loc = el.querySelector('.gallery-loc');
+    if (loc) loc.textContent = '第' + el.dataset.index + '号打卡点';
+  });
+}
+
+function resetLock() {
+  localStorage.removeItem('huangma_unlocked');
+  isPaid = false;
+  document.getElementById('paywall').classList.remove('is-paid');
+  document.querySelectorAll('.gallery-item').forEach(el => {
+    const idx = parseInt(el.dataset.index);
+    if (idx > 10) {
+      el.classList.add('locked');
+      const loc = el.querySelector('.gallery-loc');
+      if (loc) loc.textContent = '付费解锁';
+    }
+  });
+}
+
+function toggleCheck(el) {
+  const item = el.closest('.gallery-item');
+  if (item.classList.contains('locked')) return;
+  const isChecked = el.classList.toggle('checked');
+  el.textContent = isChecked ? '✓' : '○';
+  checkedCount += isChecked ? 1 : -1;
+  updateProgress();
+}
+
+function toggleItem(el) {
+  el.parentElement.classList.toggle('done', el.checked);
+}
+
+function updateProgress() {
+  const pct = Math.round(checkedCount / totalChecks * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = checkedCount + '/' + totalChecks;
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('animate-in'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.section, .stat-card, .gallery-item').forEach(el => observer.observe(el));
+
+checkPaid();
+updateProgress();
+</script>
+</body>
+</html>
