@@ -671,16 +671,11 @@
 
 <div class="paywall" id="paywall">
   <div class="paywall-locked">
-    <h3>🔒 解锁完整版打卡指南</h3>
-    <p>已免费预览前10张树洞画<br>付费即可解锁全部70张实拍 + 完整打卡功能</p>
+    <h3>🔒 还剩60张树洞画未解锁</h3>
+    <p>前10张免费预览，付费解锁完整版<br>含全部70张树洞画实拍 + 完整路书</p>
     <div class="paywall-price">¥1.99 <small>/ 份</small></div>
-    <button class="paywall-btn" onclick="unlock()">立即解锁</button>
-    <div class="paywall-note">本产品为虚拟数字内容，购买后不支持退款<br>点击按钮即视为同意解锁全部内容</div>
-  </div>
-  <div class="paywall-unlocked">
-    <h3>✅ 已全部解锁</h3>
-    <p>你已解锁全部70张树洞画实拍<br>快去山上把它们一个个打卡吧！</p>
-    <div class="paywall-note"><a href="#" style="color:#fff;text-decoration:underline;" onclick="resetLock();return false;">重置锁定状态（测试用）</a></div>
+    <button class="paywall-btn" onclick="buyFull()">购买完整版</button>
+    <div class="paywall-note">购买后获得完整版链接，含全部70张高清实拍<br>本产品为虚拟数字内容，购买后不支持退款</div>
   </div>
 </div>
 
@@ -690,42 +685,11 @@
 </div>
 
 <script>
-const totalChecks = 70;
+const totalChecks = 10;
 let checkedCount = 0;
-let isPaid = false;
 
-function checkPaid() {
-  isPaid = localStorage.getItem('huangma_unlocked') === 'true';
-  if (isPaid) { applyUnlock(); }
-}
-
-function unlock() {
-  localStorage.setItem('huangma_unlocked', 'true');
-  isPaid = true;
-  applyUnlock();
-}
-
-function applyUnlock() {
-  document.getElementById('paywall').classList.add('is-paid');
-  document.querySelectorAll('.gallery-item.locked').forEach(el => {
-    el.classList.remove('locked');
-    const loc = el.querySelector('.gallery-loc');
-    if (loc) loc.textContent = '第' + el.dataset.index + '号打卡点';
-  });
-}
-
-function resetLock() {
-  localStorage.removeItem('huangma_unlocked');
-  isPaid = false;
-  document.getElementById('paywall').classList.remove('is-paid');
-  document.querySelectorAll('.gallery-item').forEach(el => {
-    const idx = parseInt(el.dataset.index);
-    if (idx > 10) {
-      el.classList.add('locked');
-      const loc = el.querySelector('.gallery-loc');
-      if (loc) loc.textContent = '付费解锁';
-    }
-  });
+function buyFull() {
+  window.open('https://leousingai.github.io/huangma-full/', '_blank');
 }
 
 function toggleCheck(el) {
@@ -752,7 +716,6 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.section, .stat-card, .gallery-item').forEach(el => observer.observe(el));
 
-checkPaid();
 updateProgress();
 </script>
 </body>
